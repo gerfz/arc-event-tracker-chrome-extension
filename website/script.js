@@ -43,6 +43,12 @@ function loadSettings() {
     if (savedTimezone !== null) {
         timezoneOffset = parseInt(savedTimezone);
         document.getElementById('timezoneOffset').value = timezoneOffset;
+    } else {
+        // Auto-detect PC timezone if not set
+        const pcOffset = -new Date().getTimezoneOffset() / 60;
+        timezoneOffset = pcOffset;
+        localStorage.setItem('timezoneOffset', pcOffset);
+        document.getElementById('timezoneOffset').value = timezoneOffset;
     }
 
     if (savedEvents) {
@@ -271,6 +277,21 @@ function renderSchedule() {
 
         tbody.appendChild(row);
     });
+
+    // Auto-scroll to current hour row
+    scrollToCurrentHour();
+}
+
+// Scroll to current hour in the schedule
+function scrollToCurrentHour() {
+    const currentHourRow = document.querySelector('.current-hour');
+    if (currentHourRow) {
+        // Use smooth scrolling and center the row in view
+        currentHourRow.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
 }
 
 // Update current time display

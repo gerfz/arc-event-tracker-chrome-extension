@@ -36,7 +36,17 @@ let selectedMaps = [];
 document.addEventListener('DOMContentLoaded', () => {
     // Load saved timezone offset and user selections
     chrome.storage.sync.get(['timezoneOffset', 'selectedEvents', 'selectedMaps'], (result) => {
-        timezoneOffset = result.timezoneOffset || 0;
+        // Auto-detect PC timezone if not set
+        if (result.timezoneOffset === undefined) {
+            // Get PC's timezone offset in hours
+            const pcOffset = -new Date().getTimezoneOffset() / 60;
+            timezoneOffset = pcOffset;
+            // Save the auto-detected timezone
+            chrome.storage.sync.set({ timezoneOffset: pcOffset });
+        } else {
+            timezoneOffset = result.timezoneOffset;
+        }
+
         selectedEvents = result.selectedEvents || [];
         selectedMaps = result.selectedMaps || [];
 
@@ -166,6 +176,21 @@ function renderSchedule() {
 
         tbody.appendChild(row);
     });
+
+    // Auto-scroll to current hour row
+    scrollToCurrentHour();
+}
+
+// Scroll to current hour in the schedule
+function scrollToCurrentHour() {
+    const currentHourRow = document.querySelector('.current-hour');
+    if (currentHourRow) {
+        // Use smooth scrolling and center the row in view
+        currentHourRow.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
 }
 
 // Check if an event/map combination is selected for notifications
